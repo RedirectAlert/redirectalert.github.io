@@ -9,22 +9,84 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="dark:bg-gray-700 bg-gray-100 p-8 flex justify-center items-center h-screen">
-  <div class="dark:bg-gray-600 bg-white p-8 rounded-lg shadow-2xl max-w-md text-center">
-    <h2 class="text-2xl font-bold mb-4 text-black dark:text-white">⚠️Caution, redirect ahead!⚠️</h2>
-    <p class="text-gray-700 dark:text-white">You are about to be redirected to another page. Please review this information carefully before proceeding.</p>
-    <p class="text-gray-700 dark:text-white" id="info">
-    <br>
-    <input type="button" class="bg-blue-500 text-white font-bold py-3 px-3 rounded-md hover:bg-blue-700" id="link" value="Continue">
-  </div>
-  <script>
-    function getUrlParam(param) {
+  <div class="dark:bg-gray-600 bg-white p-8 rounded-lg shadow-2xl max-w-md text-center" id="alertContainer">
+    <script>
+      function getUrlParam(param) {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get(param);
-    }
-    document.getElementById("link")
-        .addEventListener("click", function () {
-            window.location.replace(getUrlParam("to"));
-    });
-  </script>
+      }
+
+      // Check if 'to' parameter is present
+      const toParam = getUrlParam("to");
+      const warningParam = getUrlParam("warning");
+
+      if (toParam !== null) {
+        // Display caution message if 'to' parameter is not null
+        const alertContainer = document.getElementById("alertContainer");
+
+        const cautionHeading = document.createElement('h2');
+        cautionHeading.className = "text-2xl font-bold mb-4 text-black dark:text-white";
+        cautionHeading.innerText = '⚠️Caution, redirect ahead!⚠️';
+        alertContainer.appendChild(cautionHeading);
+
+        const redirectInfo = document.createElement('p');
+        redirectInfo.className = "text-gray-700 dark:text-white";
+        redirectInfo.innerText = `You are about to be redirected to ${toParam}. Please review this information carefully before proceeding.`;
+        alertContainer.appendChild(redirectInfo);
+
+        // Display specific warnings if 'warning' parameter is present
+        if (warningParam !== null) {
+          const warnings = warningParam.split(',');
+
+          const warningContainer = document.createElement('div');
+          warningContainer.className = "text-center text-red-600 dark:text-red-400";
+          alertContainer.appendChild(warningContainer);
+
+          warnings.forEach((warning) => {
+            displayWarning(warning.trim(), warningContainer);
+          });
+        }
+
+        const lineBreak = document.createElement('br');
+        alertContainer.appendChild(lineBreak);
+
+        const continueButton = document.createElement('input');
+        continueButton.type = "button";
+        continueButton.className = "bg-blue-500 text-white font-bold py-3 px-3 rounded-md hover:bg-blue-700";
+        continueButton.id = "link";
+        continueButton.value = "Continue";
+        alertContainer.appendChild(continueButton);
+      } else {
+        // Display explanation if 'to' parameter is null
+        const redirectExplanation = document.createElement('p');
+        redirectExplanation.className = "text-gray-700 dark:text-white";
+        redirectExplanation.innerText = "RedirectAlert is a page that provides a cautionary message when redirecting to another page.";
+        document.getElementById("alertContainer").appendChild(redirectExplanation);
+      }
+
+      // Add click event to the button
+      document.getElementById("link").addEventListener("click", function () {
+        window.location.replace(toParam);
+      });
+
+      function displayWarning(warning, container) {
+        // Display specific warning messages based on the 'warning' parameter
+        const warningMessage = document.createElement('p');
+        switch (warning.toLowerCase()) {
+          case "malware":
+            warningMessage.innerText = "Malware is detected ahead. Proceed with caution.";
+            break;
+          case "rudecontent":
+            warningMessage.innerText = "Rude content is present on the destination page. Viewer discretion is advised.";
+            break;
+          default:
+            // Default message for unrecognized warnings
+            warningMessage.innerText = `"${warning}" is detected ahead. Proceed with caution.`;
+            break;
+        }
+        container.appendChild(warningMessage);
+      }
+    </script>
+  </div>
 </body>
 </html>
